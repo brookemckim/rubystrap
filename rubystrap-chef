@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+if [ -z $CHEF_TARGET ]; then
+  echo "Please provide a host to run chef-solo on:"
+  echo "  CHEF_TARGET=root@192.168.50.100 ./run provue"
+  exit 1
+fi
+
+if [ -z $1 ]; then
+  echo "Please provide a role to chef to:"
+  echo "  CHEF_TARGET=root@192.168.50.100 ./run provue"
+  exit 1
+fi
+
+if [ $CHEF_DIR ]; then
+  chef_directory=$CHEF_DIR
+else
+  chef_directory="~/chef"
+fi
+
+role=$1
+chef_solo="cd $chef_directory && chef-solo -c config/solo.rb -j config/$role.json"
+
+echo "Running : $chef_solo on $chef_directory"
+ssh -t $CHEF_TARGET $chef_solo
+

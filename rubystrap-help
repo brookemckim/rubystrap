@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+echo "usage: rubystrap setup [ruby version]"
+echo "       rubystrap copy [chef-solo directory]"
+echo "       rubystrap provision [config]"
+

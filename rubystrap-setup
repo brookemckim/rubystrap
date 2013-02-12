@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+if [ -z $RUBYSTRAP_TARGET ]; then
+  echo "Please provide a host to rubystrap."
+  echo " RUBYSTRAP_TARGET=192.168.1.10 rubystrap setup 1.9.3-p194"
+  exit 1
+else
+  server=$RUBYSTRAP_TARGET
+fi
+
+working_directory=/tmp/rubystrap
+
+if [ -z $1 ]; then
+  rubies='1.9.3-p194'
+else
+  rubies=$1
+fi
+
+echo "Installing $rubies"
+
+ruby_www="http://ftp.ruby-lang.org/pub/ruby"
+
+if [[ "$rubies" == 1.9* ]]; then
+  ver="1.9"
+elif [[ "$rubies" == 1.8* ]]; then
+  ver="1.8"
+else
+  echo "Unrecognized Ruby version"
+  exit 1
+fi
+
+switch_to_working_directory="mkdir -p $working_directory && cd $working_directory"
+
+# Install Ruby compile dependencies, install Ruby and RubyGems, upgrade Rubygems.
+apt_get="sudo apt-get update -y
+  && sudo apt-get install -y build-essential zlib1g-dev libssl-dev libruby1.8 
+  libreadline-dev libncurses5-dev libreadline5 libyaml-dev"
+
+ruby="curl $ruby_www/$ver/ruby-$rubies.tar.gz | tar xz && cd ruby-$rubies && ./configure && make && sudo make install"
+
+if [ $ver == "1.8" ]; then
+  rubygems_version="rubygems-1.8.25"
+  ruby_gems="curl http://production.cf.rubygems.org/rubygems/$rubygems_version.tgz | tar xz && cd $rubygems_version && sudo ruby setup.rb"
+else
+  ruby_gems=" "
+fi
+
+ruby_gems=$ruby_gems" && sudo gem update --system && sudo gem install bundler --no-ri --no-rdoc"
+
+command="$switch_to_working_directory && $apt_get && $ruby && $ruby_gems"
+ssh -t $server $command
+

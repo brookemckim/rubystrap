@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+if [ -z $RUBYSTRAP_TARGET ]; then
+  echo "Please provide a host to rubystrap."
+  echo " RUBYSTRAP_TARGET=192.168.1.10 rubystrap chef webserver"
+  exit 1
+else
+  server=$RUBYSTRAP_TARGET
+fi
+
+if [ -z $1 ]; then
+  echo "Please provide a chef-solo conf to run:"
+  echo " rubystrap chef webserver"
+  exit 1
+else
+  config=$1
+fi
+
+chef_directory=/tmp/rubystrap/chef
+chef_solo="cd $chef_directory && chef-solo -c config/solo.rb -j config/$config.json"
+
+echo "Cheffing $server to $config."
+ssh -t $server $chef_solo
+

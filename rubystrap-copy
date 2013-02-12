@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+if [ -z $RUBYSTRAP_TARGET ]; then
+  echo "Please provide a host to rubystrap."
+  echo " RUBYSTRAP_TARGET=192.168.1.10 rubystrap copy"
+  exit 1
+else
+  server=$RUBYSTRAP_TARGET
+fi
+
+working_directory=/tmp/rubystrap
+target_directory=$working_directory/chef
+
+if [ -z $1 ]; then
+  chef_directory=$PWD
+else
+  chef_directory=$1
+fi
+
+echo "Copying $chef_directory to $server:$target_directory."
+rsync --delete --recursive --progress $chef_directory/* $server:$target_directory
+
